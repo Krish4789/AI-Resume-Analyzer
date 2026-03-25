@@ -7,5 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use('/api', require('./routes/authRoutes'));
+
 mongoose.connect(process.env.MONGO_URI)
   .then(() => app.listen(5000, () => console.log('Server running on 5000')));
