@@ -19,3 +19,5 @@ const sections = {
 if (sections.skills) score += 20;
 if (sections.education) score += 20;
 if (sections.experience) score += 20;
+sections.projects = /projects/i.test(lower);
+if (sections.projects) score += 20;
