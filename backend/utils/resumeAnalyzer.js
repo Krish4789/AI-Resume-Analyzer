@@ -21,3 +21,11 @@ if (sections.education) score += 20;
 if (sections.experience) score += 20;
 sections.projects = /projects/i.test(lower);
 if (sections.projects) score += 20;
+const suggestions = [];
+
+if (!sections.skills) suggestions.push('Add a Skills section');
+if (!sections.education) suggestions.push('Add an Education section');
+if (!sections.experience) suggestions.push('Add an Experience section');
+if (!sections.projects) suggestions.push('Add a Projects section');
+
+return { score, sections, suggestions };
