@@ -22,3 +22,14 @@ export default function Dashboard() {
     </div>
   );
 }
+const upload = async (e) => {
+  const formData = new FormData();
+  formData.append('resume', e.target.files[0]);
+
+  await api.post('/upload', formData);
+
+  const res = await api.get('/resumes');
+  setResumes(res.data);
+};
+
+<input type="file" onChange={upload} />
