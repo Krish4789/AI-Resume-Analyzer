@@ -18,3 +18,11 @@ export default function Analysis() {
     </div>
   );
 }
+
+<ul>
+  {Object.entries(data.sections).map(([key, val]) => (
+    <li key={key}>
+      {key}: {val ? '✔' : '✖'}
+    </li>
+  ))}
+</ul>
