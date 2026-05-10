@@ -1,31 +1,35 @@
-const fs = require('fs');
+const Groq = require('groq-sdk');
 
-exports.analyzeResume = (filePath) => {
-  const text = fs.readFileSync(filePath, 'utf-8');
-  return { score: 0, sections: {}, suggestions: [] };
-};
-let score = 0;
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-const words = text.split(/\s+/).length;
-if (words > 300) score += 20;
-const lower = text.toLowerCase();
+async function analyzeResume(text) {
+  const prompt = `You are a professional resume reviewer. Analyze the following resume text and respond ONLY with a valid JSON object (no markdown, no explanation) in this exact format:
+{
+  "score": <number 0-100>,
+  "wordCount": <number>,
+  "detectedSections": <array of strings from: skills, education, experience, projects, certifications>,
+  "missingSections": <array of strings from: skills, education, experience, projects, certifications>,
+  "suggestions": <array of short actionable suggestion strings>,
+  "feedback": "<2-3 sentence overall AI feedback on the resume>"
+}
 
-const sections = {
-  skills: /skills/i.test(lower),
-  education: /education/i.test(lower),
-  experience: /experience/i.test(lower),
-};
+Resume text:
+${text.slice(0, 4000)}`;
 
-if (sections.skills) score += 20;
-if (sections.education) score += 20;
-if (sections.experience) score += 20;
-sections.projects = /projects/i.test(lower);
-if (sections.projects) score += 20;
-const suggestions = [];
+  const completion = await groq.chat.completions.create({
+    model: 'llama-3.1-8b-instant',
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.3,
+  });
 
-if (!sections.skills) suggestions.push('Add a Skills section');
-if (!sections.education) suggestions.push('Add an Education section');
-if (!sections.experience) suggestions.push('Add an Experience section');
-if (!sections.projects) suggestions.push('Add a Projects section');
+  const raw = completion.choices[0].message.content.trim();
+  // Strip markdown code fences if model wraps response
+  const json = raw.replace(/^```(?:json)?\n?|```$/g, '').trim();
+  const parsed = JSON.parse(json);
+  // Normalize section names to lowercase to ensure consistent matching
+  parsed.detectedSections = (parsed.detectedSections || []).map(s => s.toLowerCase());
+  parsed.missingSections = (parsed.missingSections || []).map(s => s.toLowerCase());
+  return parsed;
+}
 
-return { score, sections, suggestions };
+module.exports = analyzeResume;
