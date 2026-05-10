@@ -1,12 +1,16 @@
 const mongoose = require('mongoose');
 
-const ResumeSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  filename: String,
+const resumeSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  fileName: String,
+  parsedText: String,
   score: Number,
-  sections: Object,
+  wordCount: Number,
+  detectedSections: [String],
+  missingSections: [String],
   suggestions: [String],
+  feedback: String,
   uploadedAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Resume', ResumeSchema);
+module.exports = mongoose.model('Resume', resumeSchema);
